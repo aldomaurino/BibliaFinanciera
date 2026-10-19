@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0c121e"/>
+      <stop offset="100%" stop-color="#06090f"/>
+    </linearGradient>
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="15" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  
+  <!-- Fondo redondeado estilo app icon -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" stroke="#1e2d4a" stroke-width="8"/>
+  
+  <!-- Escudo / Bóveda exterior -->
+  <path d="M 256,90 L 390,140 L 390,265 C 390,360 256,430 256,430 C 256,430 122,360 122,265 L 122,140 Z" 
+        fill="none" stroke="url(#emeraldGrad)" stroke-width="18" stroke-linejoin="round" filter="url(#glow)"/>
+        
+  <!-- Símbolo Alfa / Sigma Financiero Central -->
+  <circle cx="256" cy="256" r="60" fill="none" stroke="#10b981" stroke-width="14"/>
+  <path d="M 256,180 L 256,332 M 225,220 L 287,220 M 225,292 L 287,292" 
+        stroke="#f1f5f9" stroke-width="14" stroke-linecap="round"/>
+</svg>
