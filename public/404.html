@@ -1,0 +1,1938 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>BibliaFinanciera - Tablero Online de Fondeo y Vencimientos</title>
+  
+  <!-- PWA Meta Tags (Rutas relativas compatibles con GitHub Pages y Local) -->
+  <meta name="theme-color" content="#070c18">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="BibliaFinanciera">
+  <link rel="manifest" href="./manifest.json">
+  <link rel="apple-touch-icon" href="./icons/icon-192.png">
+  <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-base: #070c18;
+      --bg-surface: #0e172a;
+      --bg-card: #142038;
+      --bg-card-hover: #1b2b4b;
+      --border: #1e2f4f;
+      --border-focus: #38bdf8;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --emerald: #10b981;
+      --emerald-bg: rgba(16, 185, 129, 0.12);
+      --emerald-border: rgba(16, 185, 129, 0.3);
+      --rose: #f43f5e;
+      --rose-bg: rgba(244, 63, 94, 0.12);
+      --rose-border: rgba(244, 63, 94, 0.35);
+      --amber: #f59e0b;
+      --amber-bg: rgba(245, 158, 11, 0.12);
+      --cyan: #0ea5e9;
+      --indigo: #6366f1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 95px;
+    }
+
+    .mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* Header Superior */
+    header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 1rem;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-icon {
+      width: 28px;
+      height: 28px;
+      background: linear-gradient(135deg, #10b981, #0ea5e9);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      color: #070c18;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    /* Selector de Mes */
+    .mes-selector {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: var(--bg-base);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 3px 6px;
+    }
+
+    .btn-mes {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.95rem;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: all 0.15s;
+    }
+
+    .btn-mes:hover {
+      background: var(--bg-card);
+      color: var(--text-main);
+    }
+
+    .mes-label {
+      font-weight: 700;
+      font-size: 0.82rem;
+      padding: 0 4px;
+      color: var(--text-main);
+      min-width: 105px;
+      text-align: center;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .sync-status-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 5px 10px;
+      border-radius: 20px;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      transition: all 0.2s;
+    }
+
+    .sync-status-pill.online {
+      color: var(--emerald);
+      border-color: var(--emerald-border);
+      background: var(--emerald-bg);
+    }
+
+    .sync-status-pill.syncing {
+      color: var(--cyan);
+      border-color: rgba(14, 165, 233, 0.4);
+      background: rgba(14, 165, 233, 0.12);
+    }
+
+    .sync-status-pill.offline {
+      color: var(--amber);
+      border-color: rgba(245, 158, 11, 0.3);
+      background: var(--amber-bg);
+    }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 6px currentColor;
+    }
+
+    /* Barra de Navegación Móvil Inferior */
+    nav.bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 8px 10px 14px;
+      z-index: 50;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.4);
+    }
+
+    .nav-tab {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 12px;
+      transition: all 0.2s;
+      flex: 1;
+      max-width: 110px;
+    }
+
+    .nav-tab svg {
+      width: 20px;
+      height: 20px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    .nav-tab.active {
+      color: var(--cyan);
+      background: rgba(14, 165, 233, 0.1);
+    }
+
+    /* Contenedor Principal */
+    main {
+      flex: 1;
+      padding: 16px;
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto;
+    }
+
+    .view-section {
+      display: none;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .view-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Hero Card Consolidado */
+    .hero-banner {
+      background: linear-gradient(145deg, #16243f, #0d1729);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 22px 20px;
+      margin-bottom: 20px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+
+    .hero-banner.danger {
+      border-color: var(--rose-border);
+      background: linear-gradient(145deg, #261623, #12101e);
+    }
+
+    .hero-banner.success {
+      border-color: var(--emerald-border);
+      background: linear-gradient(145deg, #0e2920, #091a16);
+    }
+
+    .hero-subtitle {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .hero-amount {
+      font-size: 2.1rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 12px;
+    }
+
+    .hero-amount.danger {
+      color: var(--rose);
+    }
+
+    .hero-amount.success {
+      color: var(--emerald);
+    }
+
+    .hero-metrics-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .hero-submetric {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hero-submetric-label {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .hero-submetric-val {
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    /* Barra de progreso mensual */
+    .progress-bar-bg {
+      width: 100%;
+      height: 6px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 999px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #10b981, #0ea5e9);
+      border-radius: 999px;
+      transition: width 0.3s ease;
+    }
+
+    /* Tarjetas de Banco */
+    .bank-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      margin-bottom: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+    }
+
+    .bank-card.deficit {
+      border-color: var(--rose-border);
+      background: linear-gradient(180deg, rgba(244, 63, 94, 0.04), var(--bg-card));
+    }
+
+    .bank-header {
+      padding: 16px 18px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .bank-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .bank-name {
+      font-size: 1rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .bank-saldo-box {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .bank-saldo-val {
+      color: var(--text-main);
+      font-weight: 700;
+    }
+
+    .btn-edit-saldo {
+      background: transparent;
+      border: none;
+      color: var(--cyan);
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+    }
+
+    .btn-edit-saldo:hover {
+      background: rgba(14, 165, 233, 0.15);
+    }
+
+    .bank-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .bank-badge.danger {
+      background: var(--rose-bg);
+      color: var(--rose);
+      border: 1px solid var(--rose-border);
+    }
+
+    .bank-badge.success {
+      background: var(--emerald-bg);
+      color: var(--emerald);
+      border: 1px solid var(--emerald-border);
+    }
+
+    .bank-badge.neutral {
+      background: rgba(255,255,255,0.06);
+      color: var(--text-muted);
+    }
+
+    /* Lista de Compromisos */
+    .commitments-list {
+      padding: 6px 12px;
+    }
+
+    .commitment-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 6px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      gap: 12px;
+      transition: background 0.15s;
+    }
+
+    .commitment-item:last-child {
+      border-bottom: none;
+    }
+
+    .commitment-item.pagado {
+      opacity: 0.6;
+    }
+
+    .commitment-item.pagado .comp-name {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .comp-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* Botón Checkbox Pago */
+    .btn-check-pago {
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+      background: var(--bg-surface);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      flex-shrink: 0;
+      color: transparent;
+    }
+
+    .btn-check-pago:hover {
+      border-color: var(--cyan);
+    }
+
+    .btn-check-pago.checked {
+      background: var(--emerald);
+      border-color: var(--emerald);
+      color: #070c18;
+    }
+
+    .comp-details {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .comp-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .comp-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .badge-vencimiento {
+      background: rgba(255,255,255,0.06);
+      padding: 2px 6px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .badge-vencimiento:hover {
+      background: rgba(14, 165, 233, 0.2);
+      color: var(--cyan);
+    }
+
+    .comp-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .comp-monto-box {
+      text-align: right;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+
+    .comp-monto-box:hover {
+      background: rgba(255,255,255,0.06);
+    }
+
+    .comp-monto {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .comp-monto.cero {
+      color: var(--amber);
+      font-size: 0.8rem;
+      font-style: italic;
+    }
+
+    .btn-delete-comp {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      border-radius: 4px;
+      opacity: 0.4;
+      transition: all 0.15s;
+    }
+
+    .btn-delete-comp:hover {
+      opacity: 1;
+      color: var(--rose);
+      background: var(--rose-bg);
+    }
+
+    .bank-footer {
+      padding: 10px 18px;
+      background: rgba(255, 255, 255, 0.015);
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-add-comp {
+      background: transparent;
+      border: 1px dashed var(--border);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-add-comp:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: rgba(14, 165, 233, 0.05);
+    }
+
+    /* Cronograma por Fecha */
+    .timeline-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .timeline-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .timeline-date-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .timeline-date-monto {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: var(--cyan);
+    }
+
+    /* Modal emergente */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.78);
+      backdrop-filter: blur(5px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal-content {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      width: 100%;
+      max-width: 440px;
+      padding: 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+      animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalPop {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      margin-bottom: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .btn-close-modal {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 1.2rem;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .form-input {
+      width: 100%;
+      background: var(--bg-base);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.95rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .form-input:focus {
+      border-color: var(--cyan);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn-primary {
+      flex: 1;
+      background: linear-gradient(135deg, #10b981, #0ea5e9);
+      border: none;
+      color: #070c18;
+      font-weight: 800;
+      font-size: 0.9rem;
+      padding: 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+
+    .btn-primary:hover {
+      opacity: 0.92;
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      font-weight: 600;
+      padding: 12px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    /* Centro de Nube */
+    .sync-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px;
+      margin-bottom: 18px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(30px);
+      background: #0f172a;
+      border: 1px solid var(--cyan);
+      color: var(--text-main);
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.25s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header Superior -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">BF</div>
+      <span>BibliaFinanciera</span>
+    </div>
+
+    <!-- Selector de Mes -->
+    <div class="mes-selector">
+      <button class="btn-mes" id="btn-mes-anterior" title="Mes Anterior">◀</button>
+      <span class="mes-label" id="lbl-mes-actual">Cargando...</span>
+      <button class="btn-mes" id="btn-mes-siguiente" title="Mes Siguiente">▶</button>
+    </div>
+
+    <div class="header-actions">
+      <button class="sync-status-pill" id="btn-instalar-app" style="display: none; background: rgba(14, 165, 233, 0.15); border-color: var(--cyan); color: var(--cyan); cursor: pointer;" title="Instalar en este Dispositivo">
+        📲 <span>Instalar App</span>
+      </button>
+      <div class="sync-status-pill online" id="btn-sync-pill" title="Toca para actualizar desde la Nube">
+        <span class="status-dot"></span>
+        <span id="txt-sync-pill">☁️ En la Nube</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenedor Principal -->
+  <main>
+    
+    <!-- ============================================== -->
+    <!-- VISTA 1: TABLERO DE FONDEO POR BANCO (PRINCIPAL) -->
+    <!-- ============================================== -->
+    <section id="vista-fondeo" class="view-section active">
+      
+      <!-- Hero Banner Consolidado -->
+      <div class="hero-banner" id="hero-banner">
+        <div class="hero-subtitle" id="hero-subtitulo">NECESIDAD DE FONDEO DEL MES</div>
+        <div class="hero-amount mono" id="hero-monto-fondeo">$ 0</div>
+        
+        <div class="hero-metrics-row">
+          <div class="hero-submetric">
+            <span class="hero-submetric-label">Ya Pagado</span>
+            <span class="hero-submetric-val mono" id="hero-val-pagado" style="color: var(--emerald);">$ 0</span>
+          </div>
+          <div class="hero-submetric">
+            <span class="hero-submetric-label">Pendiente</span>
+            <span class="hero-submetric-val mono" id="hero-val-pendiente" style="color: var(--rose);">$ 0</span>
+          </div>
+          <div class="hero-submetric">
+            <span class="hero-submetric-label">Total Mes</span>
+            <span class="hero-submetric-val mono" id="hero-val-total">$ 0</span>
+          </div>
+        </div>
+
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="hero-progreso-fill" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- Contenedor dinámico de Tarjetas por Banco -->
+      <div id="contenedor-bancos"></div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- VISTA 2: CRONOGRAMA POR FECHAS DE VENCIMIENTO   -->
+    <!-- ============================================== -->
+    <section id="vista-cronograma" class="view-section">
+      <div style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+        <h2 style="font-size: 1.1rem; font-weight: 800;">Cronograma de Vencimientos</h2>
+        <span style="font-size: 0.78rem; color: var(--text-muted);" id="lbl-cronograma-mes"></span>
+      </div>
+
+      <div id="contenedor-cronograma"></div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- VISTA 3: NUBE ONLINE 24/7 Y CUENTAS            -->
+    <!-- ============================================== -->
+    <section id="vista-sync" class="view-section">
+      <div class="sync-card" style="border-color: var(--emerald-border); background: linear-gradient(145deg, rgba(16, 185, 129, 0.08), var(--bg-card));">
+        <h2 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 6px; color: var(--emerald);">☁️ Base de Datos Online 24/7 Activa</h2>
+        <p style="font-size: 0.82rem; color: var(--text-muted); line-height: 1.5;">
+          Tanto tu computadora como tu celular leen y guardan automáticamente en el mismo lugar en la nube. Cualquier cambio que hagas en uno se refleja en el otro sin depender de estar en la misma red WiFi ni tener la PC encendida.
+        </p>
+
+        <div style="margin-top: 16px; padding: 12px; background: var(--bg-surface); border-radius: 12px; font-size: 0.78rem;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+            <span style="color: var(--text-muted);">Estado de Conexión Cloud:</span>
+            <strong id="sync-info-servidor" style="color: var(--emerald);">Conectado 24/7</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: var(--text-muted);">Última sincronización:</span>
+            <strong id="sync-info-local">Ahora mismo</strong>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; margin-top: 14px;">
+          <button class="btn-primary" id="btn-forzar-lectura-nube">
+            🔄 Actualizar desde la Nube Ahora
+          </button>
+          <button class="btn-secondary" id="btn-forzar-guardado-nube">
+            ☁️ Subir Copia Actual
+          </button>
+        </div>
+      </div>
+
+      <!-- Instalar Aplicación Nativa PWA -->
+      <div class="sync-card" id="card-instalar-pwa" style="border-color: rgba(14, 165, 233, 0.4); background: linear-gradient(145deg, rgba(14, 165, 233, 0.08), var(--bg-card));">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+          <div style="flex: 1; min-width: 220px;">
+            <h3 style="font-size: 0.98rem; font-weight: 800; color: var(--cyan); margin-bottom: 4px;">📲 Instalar en tu Celular o PC</h3>
+            <p style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.3;">
+              Al estar alojada con certificado seguro HTTPS, puedes instalarla en tu celular y abrirá incluso cuando estés sin señal en la calle o de viaje.
+            </p>
+          </div>
+          <button class="btn-primary" id="btn-instalar-pwa-cta" style="flex: none; padding: 10px 18px; font-size: 0.85rem;">
+            Instalar App
+          </button>
+        </div>
+        <div id="instrucciones-ios" style="display: none; margin-top: 10px; font-size: 0.75rem; color: var(--amber); background: var(--amber-bg); padding: 8px 12px; border-radius: 8px;">
+          ℹ️ En iPhone (Safari): Presiona el botón <strong>Compartir</strong> y selecciona <strong>"Agregar a la pantalla de inicio"</strong>.
+        </div>
+      </div>
+
+      <!-- Gestión de Saldos de Cuentas -->
+      <div class="sync-card">
+        <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px;">Saldos de Cuentas Bancarias</h3>
+        <div id="lista-gestion-cuentas"></div>
+      </div>
+
+      <!-- Respaldo Manual Opcional -->
+      <div class="sync-card">
+        <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 8px;">Copia de Seguridad en Archivo (.json)</h3>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn-secondary" style="flex: 1; font-size: 0.8rem;" id="btn-exportar-archivo">
+            📥 Descargar Backup (.json)
+          </button>
+          <label class="btn-secondary" style="flex: 1; font-size: 0.8rem; text-align: center; cursor: pointer;">
+            📤 Restaurar Backup
+            <input type="file" id="input-importar-archivo" accept=".json" style="display: none;">
+          </label>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Barra de Navegación Inferior -->
+  <nav class="bottom-nav">
+    <button class="nav-tab active" data-vista="vista-fondeo">
+      <svg viewBox="0 0 24 24"><path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v4M12 14v4M16 14v4"/></svg>
+      <span>Bancos</span>
+    </button>
+    <button class="nav-tab" data-vista="vista-cronograma">
+      <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span>Fechas</span>
+    </button>
+    <button class="nav-tab" data-vista="vista-sync">
+      <svg viewBox="0 0 24 24"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+      <span>Nube y Cuentas</span>
+    </button>
+  </nav>
+
+  <!-- Modal de PIN de Seguridad (Solo se pide 1 vez por dispositivo) -->
+  <div class="modal-overlay" id="modal-pin">
+    <div class="modal-content" style="text-align: center;">
+      <div style="width: 48px; height: 48px; background: linear-gradient(135deg, #10b981, #0ea5e9); border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-weight: 900; color: #070c18; font-size: 1.2rem;">
+        🔒
+      </div>
+      <h3 style="font-size: 1.2rem; font-weight: 800; margin-bottom: 6px;">Acceso Privado de Aldo</h3>
+      <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 18px;">
+        Ingresa tu PIN personal de 4 dígitos para conectar con tu base de datos en la nube (quedarás conectado en este dispositivo).
+      </p>
+      <div class="form-group">
+        <input type="password" inputmode="numeric" maxlength="4" class="form-input mono" id="input-pin-acceso" placeholder="••••" style="text-align: center; font-size: 1.6rem; letter-spacing: 0.4em; font-weight: 800;">
+      </div>
+      <div class="modal-actions">
+        <button class="btn-primary" id="btn-desbloquear-pin">Conectar y Sincronizar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Editar Monto y Vencimiento -->
+  <div class="modal-overlay" id="modal-editar-comp">
+    <div class="modal-content">
+      <div class="modal-title">
+        <span id="modal-comp-titulo">Editar Compromiso</span>
+        <button class="btn-close-modal" id="btn-cerrar-modal-comp">&times;</button>
+      </div>
+
+      <input type="hidden" id="modal-comp-id">
+
+      <div class="form-group">
+        <label class="form-label">Monto del Mes ($ ARS)</label>
+        <input type="number" step="0.01" class="form-input mono" id="modal-comp-monto" placeholder="0.00" style="font-size: 1.2rem; font-weight: 700;">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Fecha de Vencimiento</label>
+        <input type="date" class="form-input" id="modal-comp-fecha">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btn-cancelar-modal-comp">Cancelar</button>
+        <button class="btn-primary" id="btn-guardar-modal-comp">Guardar Cambios</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Agregar Nuevo Compromiso a Banco -->
+  <div class="modal-overlay" id="modal-nuevo-comp">
+    <div class="modal-content">
+      <div class="modal-title">
+        <span>Nuevo Compromiso</span>
+        <button class="btn-close-modal" id="btn-cerrar-modal-nuevo">&times;</button>
+      </div>
+
+      <input type="hidden" id="modal-nuevo-id-cuenta">
+
+      <div class="form-group">
+        <label class="form-label">Nombre del Compromiso / Débito</label>
+        <input type="text" class="form-input" id="modal-nuevo-nombre" placeholder="ej. Seguro Auto, Cuota Club...">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Monto del Mes ($ ARS) (0 si aún no llegó)</label>
+        <input type="number" step="0.01" class="form-input mono" id="modal-nuevo-monto" value="0">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Fecha de Vencimiento Estimada</label>
+        <input type="date" class="form-input" id="modal-nuevo-fecha">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Categoría</label>
+        <select class="form-input" id="modal-nuevo-categoria">
+          <option value="Tarjetas">Tarjetas de Crédito</option>
+          <option value="Vivienda">Vivienda / Expensas</option>
+          <option value="Servicios">Servicios (Luz, Gas, Internet)</option>
+          <option value="Educación">Educación</option>
+          <option value="Impuestos">Impuestos (AFIP/ARCA, Rentas)</option>
+          <option value="Seguros">Seguros</option>
+          <option value="General">General / Otros</option>
+        </select>
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btn-cancelar-modal-nuevo">Cancelar</button>
+        <button class="btn-primary" id="btn-guardar-modal-nuevo">Crear Compromiso</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal para Editar Saldo de Cuenta -->
+  <div class="modal-overlay" id="modal-editar-saldo">
+    <div class="modal-content">
+      <div class="modal-title">
+        <span id="modal-saldo-cuenta-nombre">Actualizar Saldo</span>
+        <button class="btn-close-modal" id="btn-cerrar-modal-saldo">&times;</button>
+      </div>
+
+      <input type="hidden" id="modal-saldo-id-cuenta">
+
+      <div class="form-group">
+        <label class="form-label">Saldo Actual Disponible</label>
+        <input type="number" step="0.01" class="form-input mono" id="modal-saldo-valor" style="font-size: 1.2rem; font-weight: 700;">
+      </div>
+
+      <div class="modal-actions">
+        <button class="btn-secondary" id="btn-cancelar-modal-saldo">Cancelar</button>
+        <button class="btn-primary" id="btn-guardar-modal-saldo">Actualizar Saldo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notificación Toast -->
+  <div class="toast" id="toast">Sincronizado en la nube</div>
+
+  <!-- Script Principal con Motor Cloud + Offline Autónomo -->
+  <script>
+    // ============================================================================
+    // CONFIGURACIÓN DE BÓVEDA EN LA NUBE (CIFRADA CON PIN PERSONAL)
+    // ============================================================================
+    const CLOUD_GIST_ID = '8b38f83f5ba0a7480677838909c5bd20';
+    const BYTES_CIFRADOS = [37,6,3,38,69,33,2,108,102,3,36,62,51,61,114,60,42,60,48,243,144,181,163,134,185,186,235,225,172,206,211,178,143,210,238,170,169,110,46,79];
+
+    // Datos iniciales por defecto por si el dispositivo arranca por primera vez sin señal
+    const ESTADO_INICIAL_SEMILLA = {
+      origen: 'SEMILLA',
+      timestamp: '2026-10-10T00:00:00.000Z',
+      cuentas: [
+        { id: 'cta-santander', nombre: 'Santander Caja de Ahorro ARS', tipo_cuenta: 'CAJA_AHORRO', moneda: 'ARS', saldo_actual: 12420.92, es_reserva: false },
+        { id: 'cta-santander-usd', nombre: 'Santander Caja de Ahorro USD', tipo_cuenta: 'CAJA_AHORRO', moneda: 'USD', saldo_actual: 2556.23, es_reserva: false },
+        { id: 'cta-santander-inv-usd', nombre: 'Santander Inversiones USD (Reserva)', tipo_cuenta: 'CAJA_AHORRO', moneda: 'USD', saldo_actual: 20000, es_reserva: true },
+        { id: 'cta-nbch', nombre: 'NBCH Caja de Ahorro', tipo_cuenta: 'CAJA_AHORRO', moneda: 'ARS', saldo_actual: 58832.72, es_reserva: false },
+        { id: 'cta-brubank', nombre: 'Brubank Banco Digital', tipo_cuenta: 'CAJA_AHORRO', moneda: 'ARS', saldo_actual: 552.91, es_reserva: false },
+        { id: 'cta-mercadopago', nombre: 'Mercado Pago Billetera ARS', tipo_cuenta: 'BILLETERA_VIRTUAL', moneda: 'ARS', saldo_actual: 6919.67, es_reserva: false },
+        { id: 'cta-mercadopago-usd', nombre: 'Mercado Pago USD', tipo_cuenta: 'BILLETERA_VIRTUAL', moneda: 'USD', saldo_actual: 150.73, es_reserva: false },
+        { id: 'cta-efectivo', nombre: 'Caja Efectivo Físico', tipo_cuenta: 'CAJA_EFECTIVO', moneda: 'ARS', saldo_actual: 0, es_reserva: false }
+      ],
+      compromisosMensuales: [
+        { id: 'comp-2026-10-facultad', id_cuenta_debito: 'cta-santander', mes_ciclo: '2026-10', nombre: 'Facultad', categoria: 'Educación', monto: 900000, moneda: 'ARS', dia_vencimiento_estimado: 5, fecha_vencimiento: '2026-10-05', estado: 'PENDIENTE', es_recurrente: true, actualizado_en: '2026-10-10T13:05:14.000Z' },
+        { id: 'comp-2026-10-expensas-bsas', id_cuenta_debito: 'cta-santander', mes_ciclo: '2026-10', nombre: 'Expensas BsAs', categoria: 'Vivienda', monto: 600000, moneda: 'ARS', dia_vencimiento_estimado: 10, fecha_vencimiento: '2026-10-10', estado: 'PENDIENTE', es_recurrente: true, actualizado_en: '2026-10-10T13:05:14.000Z' },
+        { id: 'comp-2026-10-expensas-girasoles', id_cuenta_debito: 'cta-santander', mes_ciclo: '2026-10', nombre: 'Expensas Girasoles', categoria: 'Vivienda', monto: 300000, moneda: 'ARS', dia_vencimiento_estimado: 10, fecha_vencimiento: '2026-10-10', estado: 'PENDIENTE', es_recurrente: true, actualizado_en: '2026-10-10T13:05:14.000Z' },
+        { id: 'comp-2026-10-luz-bsas', id_cuenta_debito: 'cta-santander', mes_ciclo: '2026-10', nombre: 'Luz BsAs', categoria: 'Servicios', monto: 200000, moneda: 'ARS', dia_vencimiento_estimado: 15, fecha_vencimiento: '2026-10-15', estado: 'PENDIENTE', es_recurrente: true, actualizado_en: '2026-10-10T13:05:14.000Z' },
+        { id: 'comp-2026-10-la-equitativa', id_cuenta_debito: 'cta-santander', mes_ciclo: '2026-10', nombre: 'La Equitativa (Seguros)', categoria: 'Seguros', monto: 260000, moneda: 'ARS', dia_vencimiento_estimado: 15, fecha_vencimiento: '2026-10-15', estado: 'PENDIENTE', es_recurrente: true, actualizado_en: '2026-10-10T13:05:14.000Z' },
+        { id: 'comp-2026-10-arca', id_cuenta_debito: 'cta-santander', mes_ciclo: '2026-10', nombre: 'ARCA (AFIP)', categoria: 'Impuestos', monto: 180000, moneda: 'ARS', dia_vencimiento_estimado: 20, fecha_vencimiento: '2026-10-20', estado: 'PENDIENTE', es_recurrente: true, actualizado_en: '2026-10-10T13:05:14.000Z' },
+        { id: 'comp-2026-10-tc-visa', id_cuenta_debito: 'cta-santander', mes_ciclo: '2026-10', nombre: 'TC Santander Visa (Resumen)', categoria: 'Tarjetas', monto: 2362544.75, moneda: 'ARS', dia_vencimiento_estimado: 28, fecha_vencimiento: '2026-10-28', estado: 'PENDIENTE', es_recurrente: true, actualizado_en: '2026-10-10T13:05:14.000Z' },
+        { id: 'comp-2026-10-tc-amex', id_cuenta_debito: 'cta-santander', mes_ciclo: '2026-10', nombre: 'TC Santander American Express (Resumen)', categoria: 'Tarjetas', monto: 2213797.77, moneda: 'ARS', dia_vencimiento_estimado: 28, fecha_vencimiento: '2026-10-28', estado: 'PENDIENTE', es_recurrente: true, actualizado_en: '2026-10-10T13:05:14.000Z' }
+      ]
+    };
+
+    function descifrarTokenConPin(pin) {
+      const clave = 'BibliaFin_2026_' + String(pin).trim();
+      let resultado = '';
+      for (let i = 0; i < BYTES_CIFRADOS.length; i++) {
+        resultado += String.fromCharCode(BYTES_CIFRADOS[i] ^ clave.charCodeAt(i % clave.length) ^ ((i * 7) & 0xff));
+      }
+      return resultado;
+    }
+
+    function obtenerTokenCloud() {
+      const pinGuardado = localStorage.getItem('biblia_pin_usuario');
+      if (!pinGuardado) return null;
+      const token = descifrarTokenConPin(pinGuardado);
+      if (token && (token.startsWith('gho_') || token.startsWith('ghp_'))) {
+        return token;
+      }
+      return null;
+    }
+
+    // --- ESTADO GLOBAL EN EL DISPOSITIVO ---
+    const fechaHoy = new Date();
+    const mesHoyIso = `${fechaHoy.getFullYear()}-${String(fechaHoy.getMonth() + 1).padStart(2, '0')}`;
+    let mesCicloActivo = localStorage.getItem('biblia_mes_activo') || mesHoyIso;
+    let baseDatos = cargarBaseLocal();
+    let datosTablero = null;
+
+    function cargarBaseLocal() {
+      try {
+        const guardado = localStorage.getItem('biblia_db_cloud');
+        if (guardado) {
+          const parsed = JSON.parse(guardado);
+          if (parsed && Array.isArray(parsed.cuentas) && Array.isArray(parsed.compromisosMensuales)) {
+            return parsed;
+          }
+        }
+      } catch (e) {
+        console.warn('Error leyendo caché local:', e);
+      }
+      return JSON.parse(JSON.stringify(ESTADO_INICIAL_SEMILLA));
+    }
+
+    function guardarBaseLocal(marcarPendienteSubir = false) {
+      baseDatos.timestamp = new Date().toISOString();
+      if (marcarPendienteSubir) {
+        localStorage.setItem('biblia_pendiente_subir', 'true');
+      }
+      localStorage.setItem('biblia_db_cloud', JSON.stringify(baseDatos));
+    }
+
+    // --- MOTOR MATEMÁTICO DEL TABLERO MENSUAL EN NAVEGADOR ---
+    function obtenerNombreMes(mesCiclo) {
+      const nombres = [
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+      ];
+      const partes = mesCiclo.split('-');
+      if (partes.length === 2) {
+        const anio = partes[0];
+        const mesNum = parseInt(partes[1], 10);
+        if (mesNum >= 1 && mesNum <= 12) {
+          return `${nombres[mesNum - 1]} ${anio}`;
+        }
+      }
+      return mesCiclo;
+    }
+
+    function recalcularTableroLocal() {
+      const mesCiclo = mesCicloActivo;
+      const mesNombre = obtenerNombreMes(mesCiclo);
+
+      let compromisosMes = baseDatos.compromisosMensuales.filter(c => c.mes_ciclo === mesCiclo);
+
+      // Si el mes seleccionado aún no tiene compromisos, clonamos automáticamente los recurrentes del mes más cercano
+      if (compromisosMes.length === 0 && baseDatos.compromisosMensuales.length > 0) {
+        const mesesConDatos = Array.from(new Set(baseDatos.compromisosMensuales.map(c => c.mes_ciclo))).sort().reverse();
+        const mesOrigen = mesesConDatos[0];
+        if (mesOrigen) {
+          const plantilla = baseDatos.compromisosMensuales.filter(c => c.mes_ciclo === mesOrigen && c.es_recurrente !== false);
+          const ahoraIso = new Date().toISOString();
+          plantilla.forEach((orig, idx) => {
+            const dia = String(orig.dia_vencimiento_estimado || 10).padStart(2, '0');
+            baseDatos.compromisosMensuales.push({
+              id: `comp-${mesCiclo}-${Date.now().toString(36)}-${idx}`,
+              id_cuenta_debito: orig.id_cuenta_debito,
+              mes_ciclo: mesCiclo,
+              nombre: orig.nombre,
+              categoria: orig.categoria || 'General',
+              monto: 0,
+              moneda: orig.moneda || 'ARS',
+              dia_vencimiento_estimado: orig.dia_vencimiento_estimado || 10,
+              fecha_vencimiento: `${mesCiclo}-${dia}`,
+              estado: 'PENDIENTE',
+              es_recurrente: true,
+              actualizado_en: ahoraIso
+            });
+          });
+          guardarBaseLocal(true);
+          sincronizarHaciaNube();
+          compromisosMes = baseDatos.compromisosMensuales.filter(c => c.mes_ciclo === mesCiclo);
+        }
+      }
+
+      // Ordenar por fecha de vencimiento
+      compromisosMes.sort((a, b) => (a.fecha_vencimiento || '').localeCompare(b.fecha_vencimiento || ''));
+
+      const bancos = [];
+      let totalComprometidoMes = 0;
+      let totalPagadoMes = 0;
+      let totalPendienteMes = 0;
+      let totalFaltanteFondeoMes = 0;
+
+      baseDatos.cuentas.forEach(cta => {
+        const compCuenta = compromisosMes.filter(c => c.id_cuenta_debito === cta.id);
+        const totalCompromisos = compCuenta.reduce((s, c) => s + Number(c.monto || 0), 0);
+        const totalPagado = compCuenta.filter(c => c.estado === 'PAGADO').reduce((s, c) => s + Number(c.monto || 0), 0);
+        const totalPendiente = compCuenta.filter(c => c.estado === 'PENDIENTE').reduce((s, c) => s + Number(c.monto || 0), 0);
+
+        const saldoActual = Number(cta.saldo_actual || 0);
+        const requiereFondeo = cta.moneda === 'ARS' && !cta.es_reserva && totalPendiente > saldoActual;
+        const faltanteFondeo = requiereFondeo ? Number((totalPendiente - saldoActual).toFixed(2)) : 0;
+        const sobranteFondeo = saldoActual >= totalPendiente ? Number((saldoActual - totalPendiente).toFixed(2)) : 0;
+
+        if (requiereFondeo) {
+          totalFaltanteFondeoMes += faltanteFondeo;
+        }
+        totalComprometidoMes += totalCompromisos;
+        totalPagadoMes += totalPagado;
+        totalPendienteMes += totalPendiente;
+
+        bancos.push({
+          idCuenta: cta.id,
+          nombreBanco: cta.nombre,
+          moneda: cta.moneda,
+          saldoActual,
+          esReserva: Boolean(cta.es_reserva),
+          totalCompromisos: Number(totalCompromisos.toFixed(2)),
+          totalPagado: Number(totalPagado.toFixed(2)),
+          totalPendiente: Number(totalPendiente.toFixed(2)),
+          requiereFondeo,
+          faltanteFondeo,
+          sobranteFondeo,
+          compromisos: compCuenta
+        });
+      });
+
+      // Cronograma por fecha de vencimiento
+      const fechasMap = new Map();
+      compromisosMes.forEach(comp => {
+        const fecha = comp.fecha_vencimiento || `${mesCiclo}-28`;
+        const bancoObj = baseDatos.cuentas.find(c => c.id === comp.id_cuenta_debito);
+        const nombreBanco = bancoObj ? bancoObj.nombre : 'Banco';
+        if (!fechasMap.has(fecha)) {
+          fechasMap.set(fecha, []);
+        }
+        fechasMap.get(fecha).push({
+          id: comp.id,
+          nombre: comp.nombre,
+          banco: nombreBanco,
+          idCuenta: comp.id_cuenta_debito,
+          monto: Number(comp.monto || 0),
+          estado: comp.estado
+        });
+      });
+
+      const fechasOrdenadas = Array.from(fechasMap.keys()).sort();
+      const cronogramaVencimientos = fechasOrdenadas.map(fecha => {
+        const lista = fechasMap.get(fecha);
+        const totalFecha = lista.reduce((s, item) => s + item.monto, 0);
+        const dia = parseInt(fecha.split('-')[2] || '1', 10);
+        return {
+          fecha,
+          dia,
+          totalFecha: Number(totalFecha.toFixed(2)),
+          compromisos: lista
+        };
+      });
+
+      const porcentajePagado = totalComprometidoMes > 0
+        ? Math.round((totalPagadoMes / totalComprometidoMes) * 100)
+        : 0;
+
+      datosTablero = {
+        mesCiclo,
+        mesNombre,
+        totalComprometidoMes: Number(totalComprometidoMes.toFixed(2)),
+        totalPagadoMes: Number(totalPagadoMes.toFixed(2)),
+        totalPendienteMes: Number(totalPendienteMes.toFixed(2)),
+        totalFaltanteFondeoMes: Number(totalFaltanteFondeoMes.toFixed(2)),
+        porcentajePagado,
+        bancos,
+        cronogramaVencimientos
+      };
+
+      renderizarTablero();
+    }
+
+    // --- SINCRONIZACIÓN AUTOMÁTICA CON LA NUBE (GITHUB GIST API) ---
+    function actualizarIndicadorEstado(estado, texto) {
+      const pill = document.getElementById('btn-sync-pill');
+      const txt = document.getElementById('txt-sync-pill');
+      const infoServidor = document.getElementById('sync-info-servidor');
+      const infoLocal = document.getElementById('sync-info-local');
+
+      pill.className = `sync-status-pill ${estado}`;
+      txt.textContent = texto;
+
+      if (infoServidor) {
+        infoServidor.textContent = estado === 'online' ? 'Sincronizado 24/7' : (estado === 'syncing' ? 'Sincronizando...' : 'Modo Offline (Guardado en equipo)');
+        infoServidor.style.color = estado === 'online' ? 'var(--emerald)' : 'var(--amber)';
+      }
+      if (infoLocal) {
+        const hora = new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+        infoLocal.textContent = `Hoy a las ${hora}`;
+      }
+    }
+
+    async function sincronizarDesdeNube(silencioso = false) {
+      const token = obtenerTokenCloud();
+      if (!token) {
+        document.getElementById('modal-pin').classList.add('open');
+        document.getElementById('input-pin-acceso').focus();
+        return;
+      }
+
+      // Si hay cambios locales hechos mientras estaba sin señal, primero los subimos a la nube
+      if (localStorage.getItem('biblia_pendiente_subir') === 'true') {
+        await sincronizarHaciaNube();
+        return;
+      }
+
+      if (!silencioso) actualizarIndicadorEstado('syncing', '🔄 Sincronizando...');
+
+      try {
+        const resp = await fetch(`https://api.github.com/gists/${CLOUD_GIST_ID}?t=${Date.now()}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/vnd.github+json'
+          },
+          cache: 'no-store'
+        });
+
+        if (!resp.ok) throw new Error('Error consultando nube');
+        const gist = await resp.json();
+        const archivo = gist.files && gist.files['biblia_financiera_db.json'];
+        if (archivo && archivo.content) {
+          const nubeData = JSON.parse(archivo.content);
+          if (nubeData && Array.isArray(nubeData.cuentas) && Array.isArray(nubeData.compromisosMensuales)) {
+            baseDatos = nubeData;
+            localStorage.setItem('biblia_db_cloud', JSON.stringify(baseDatos));
+            recalcularTableroLocal();
+            actualizarIndicadorEstado('online', '☁️ Sincronizado');
+
+            // Si estamos en el servidor local de la PC, espejar también en SQLite local
+            espejarEnServidorLocal();
+          }
+        }
+      } catch (e) {
+        console.warn('Sin conexión a internet, operando con base local en dispositivo:', e);
+        actualizarIndicadorEstado('offline', '📱 Modo Offline');
+      }
+    }
+
+    async function sincronizarHaciaNube() {
+      const token = obtenerTokenCloud();
+      if (!token) {
+        document.getElementById('modal-pin').classList.add('open');
+        return;
+      }
+
+      actualizarIndicadorEstado('syncing', '☁️ Guardando...');
+
+      try {
+        const contenido = JSON.stringify({
+          origen: 'CLOUD_SYNC',
+          timestamp: new Date().toISOString(),
+          cuentas: baseDatos.cuentas,
+          compromisosMensuales: baseDatos.compromisosMensuales
+        }, null, 2);
+
+        const resp = await fetch(`https://api.github.com/gists/${CLOUD_GIST_ID}`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/vnd.github+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            files: {
+              'biblia_financiera_db.json': { content: contenido }
+            }
+          })
+        });
+
+        if (!resp.ok) throw new Error('No se pudo guardar en nube');
+        localStorage.removeItem('biblia_pendiente_subir');
+        actualizarIndicadorEstado('online', '☁️ Sincronizado');
+        espejarEnServidorLocal();
+      } catch (e) {
+        console.warn('Guardado en dispositivo local; se subirá al recuperar señal:', e);
+        localStorage.setItem('biblia_pendiente_subir', 'true');
+        actualizarIndicadorEstado('offline', '📱 Guardado en Equipo');
+      }
+    }
+
+    async function espejarEnServidorLocal() {
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        try {
+          await fetch('/api/sync/importar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ paquete: baseDatos, modo: 'SOBRESCRIBIR' })
+          });
+        } catch (_) {}
+      }
+    }
+
+    // Desbloqueo con PIN
+    document.getElementById('btn-desbloquear-pin').addEventListener('click', validarPinIngresado);
+    document.getElementById('input-pin-acceso').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') validarPinIngresado();
+    });
+
+    function validarPinIngresado() {
+      const pin = document.getElementById('input-pin-acceso').value.trim();
+      const token = descifrarTokenConPin(pin);
+      if (token && (token.startsWith('gho_') || token.startsWith('ghp_'))) {
+        localStorage.setItem('biblia_pin_usuario', pin);
+        document.getElementById('modal-pin').classList.remove('open');
+        mostrarToast('🔓 Dispositivo vinculado a la nube');
+        sincronizarDesdeNube();
+      } else {
+        alert('PIN incorrecto. Ingresa tu PIN de 4 dígitos (1234).');
+      }
+    }
+
+    // Formateadores
+    function formatoMoneda(valor, moneda = 'ARS') {
+      const num = Number(valor || 0);
+      return new Intl.NumberFormat('es-AR', {
+        style: 'currency',
+        currency: moneda,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(num);
+    }
+
+    function formatoFechaCorta(fechaIso) {
+      if (!fechaIso) return '';
+      const partes = fechaIso.split('-');
+      if (partes.length === 3) {
+        return `${partes[2]}/${partes[1]}`;
+      }
+      return fechaIso;
+    }
+
+    function mostrarToast(mensaje) {
+      const toast = document.getElementById('toast');
+      toast.textContent = mensaje;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2300);
+    }
+
+    // Navegación de Pestañas
+    document.querySelectorAll('.nav-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.vista).classList.add('active');
+      });
+    });
+
+    // Navegación de Meses
+    document.getElementById('btn-mes-anterior').addEventListener('click', () => cambiarMes(-1));
+    document.getElementById('btn-mes-siguiente').addEventListener('click', () => cambiarMes(1));
+
+    function cambiarMes(delta) {
+      const partes = mesCicloActivo.split('-');
+      let anio = parseInt(partes[0], 10);
+      let mes = parseInt(partes[1], 10) + delta;
+
+      if (mes < 1) {
+        mes = 12;
+        anio--;
+      } else if (mes > 12) {
+        mes = 1;
+        anio++;
+      }
+
+      mesCicloActivo = `${anio}-${String(mes).padStart(2, '0')}`;
+      localStorage.setItem('biblia_mes_activo', mesCicloActivo);
+      recalcularTableroLocal();
+    }
+
+    document.getElementById('btn-sync-pill').addEventListener('click', () => {
+      sincronizarDesdeNube();
+      mostrarToast('Actualizando desde la nube...');
+    });
+
+    document.getElementById('btn-forzar-lectura-nube').addEventListener('click', () => {
+      localStorage.removeItem('biblia_pendiente_subir');
+      sincronizarDesdeNube();
+      mostrarToast('Datos descargados de la nube');
+    });
+
+    document.getElementById('btn-forzar-guardado-nube').addEventListener('click', () => {
+      sincronizarHaciaNube();
+      mostrarToast('Datos subidos a la nube');
+    });
+
+    // --- RENDERIZADO DEL TABLERO ---
+    function renderizarTablero() {
+      if (!datosTablero) return;
+
+      document.getElementById('lbl-mes-actual').textContent = datosTablero.mesNombre || mesCicloActivo;
+      document.getElementById('lbl-cronograma-mes').textContent = datosTablero.mesNombre || mesCicloActivo;
+
+      const heroBanner = document.getElementById('hero-banner');
+      const heroSub = document.getElementById('hero-subtitulo');
+      const heroMonto = document.getElementById('hero-monto-fondeo');
+
+      if (datosTablero.totalFaltanteFondeoMes > 0) {
+        heroBanner.className = 'hero-banner danger';
+        heroSub.textContent = 'FALTA FONDEAR EN EL MES';
+        heroMonto.className = 'hero-amount danger mono';
+        heroMonto.textContent = formatoMoneda(datosTablero.totalFaltanteFondeoMes);
+      } else {
+        heroBanner.className = 'hero-banner success';
+        heroSub.textContent = 'MES COMPLETAMENTE CUBIERTO';
+        heroMonto.className = 'hero-amount success mono';
+        heroMonto.textContent = '✓ Fondeo Cubierto';
+      }
+
+      document.getElementById('hero-val-pagado').textContent = formatoMoneda(datosTablero.totalPagadoMes);
+      document.getElementById('hero-val-pendiente').textContent = formatoMoneda(datosTablero.totalPendienteMes);
+      document.getElementById('hero-val-total').textContent = formatoMoneda(datosTablero.totalComprometidoMes);
+      document.getElementById('hero-progreso-fill').style.width = `${datosTablero.porcentajePagado || 0}%`;
+
+      const contBancos = document.getElementById('contenedor-bancos');
+      contBancos.innerHTML = '';
+
+      datosTablero.bancos.forEach(banco => {
+        const card = document.createElement('div');
+        card.className = `bank-card ${banco.requiereFondeo ? 'deficit' : ''}`;
+
+        let badgeHtml = '';
+        if (banco.moneda === 'USD' || banco.esReserva) {
+          badgeHtml = `<span class="bank-badge neutral">${banco.esReserva ? 'Reserva' : 'USD'}</span>`;
+        } else if (banco.requiereFondeo) {
+          badgeHtml = `<span class="bank-badge danger">⚠️ Falta fondear: ${formatoMoneda(banco.faltanteFondeo)}</span>`;
+        } else {
+          badgeHtml = `<span class="bank-badge success">✓ Cubierto (${formatoMoneda(banco.sobranteFondeo)})</span>`;
+        }
+
+        card.innerHTML = `
+          <div class="bank-header">
+            <div class="bank-info">
+              <span class="bank-name">${banco.nombreBanco}</span>
+              <div class="bank-saldo-box">
+                <span>Saldo en cuenta:</span>
+                <span class="bank-saldo-val mono">${formatoMoneda(banco.saldoActual, banco.moneda)}</span>
+                <button class="btn-edit-saldo" onclick="abrirModalSaldo('${banco.idCuenta}', '${banco.nombreBanco}', ${banco.saldoActual})" title="Actualizar Saldo">✎</button>
+              </div>
+            </div>
+            <div>${badgeHtml}</div>
+          </div>
+          <div class="commitments-list" id="lista-comp-${banco.idCuenta}"></div>
+          <div class="bank-footer">
+            <span style="font-size: 0.72rem; color: var(--text-muted);">
+              Pendiente: <strong class="mono" style="color: ${banco.totalPendiente > 0 ? 'var(--rose)' : 'var(--text-main)'}">${formatoMoneda(banco.totalPendiente, banco.moneda)}</strong>
+            </span>
+            <button class="btn-add-comp" onclick="abrirModalNuevoComp('${banco.idCuenta}')">
+              + Agregar compromiso
+            </button>
+          </div>
+        `;
+
+        contBancos.appendChild(card);
+
+        const contLista = card.querySelector(`#lista-comp-${banco.idCuenta}`);
+        if (!banco.compromisos || banco.compromisos.length === 0) {
+          contLista.innerHTML = `<div style="padding: 12px 6px; font-size: 0.78rem; color: var(--text-muted); font-style: italic;">Sin compromisos cargados para este mes.</div>`;
+        } else {
+          banco.compromisos.forEach(comp => {
+            const item = document.createElement('div');
+            item.className = `commitment-item ${comp.estado === 'PAGADO' ? 'pagado' : ''}`;
+
+            const vencimientoCorta = formatoFechaCorta(comp.fecha_vencimiento);
+            const esCero = !comp.monto || comp.monto === 0;
+
+            item.innerHTML = `
+              <div class="comp-left">
+                <button class="btn-check-pago ${comp.estado === 'PAGADO' ? 'checked' : ''}" 
+                        onclick="togglePago('${comp.id}')" 
+                        title="${comp.estado === 'PAGADO' ? 'Marcar como Pendiente' : 'Marcar como Pagado'}">
+                  ✓
+                </button>
+                <div class="comp-details">
+                  <span class="comp-name">${comp.nombre}</span>
+                  <div class="comp-meta">
+                    <span class="badge-vencimiento" onclick="abrirModalComp('${comp.id}', '${comp.nombre.replace(/'/g, "\\'")}', ${comp.monto}, '${comp.fecha_vencimiento}')">
+                      📅 Vence: ${vencimientoCorta || 'Sin fecha'}
+                    </span>
+                    <span>•</span>
+                    <span>${comp.categoria || 'General'}</span>
+                  </div>
+                </div>
+              </div>
+              <div class="comp-right">
+                <div class="comp-monto-box" onclick="abrirModalComp('${comp.id}', '${comp.nombre.replace(/'/g, "\\'")}', ${comp.monto}, '${comp.fecha_vencimiento}')">
+                  <span class="comp-monto mono ${esCero ? 'cero' : ''}">
+                    ${esCero ? '+ Cargar Monto' : formatoMoneda(comp.monto, comp.moneda)}
+                  </span>
+                </div>
+                <button class="btn-delete-comp" onclick="eliminarCompromiso('${comp.id}')" title="Eliminar compromiso">✕</button>
+              </div>
+            `;
+            contLista.appendChild(item);
+          });
+        }
+      });
+
+      renderizarCronograma();
+      renderizarListaGestionCuentas();
+    }
+
+    function renderizarCronograma() {
+      const contCronograma = document.getElementById('contenedor-cronograma');
+      contCronograma.innerHTML = '';
+
+      if (!datosTablero.cronogramaVencimientos || datosTablero.cronogramaVencimientos.length === 0) {
+        contCronograma.innerHTML = `<div style="text-align: center; padding: 40px; color: var(--text-muted);">No hay compromisos con fechas para este mes.</div>`;
+        return;
+      }
+
+      datosTablero.cronogramaVencimientos.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'timeline-card';
+
+        const partes = item.fecha.split('-');
+        const fechaTexto = `${partes[2]}/${partes[1]}/${partes[0]}`;
+
+        let compItemsHtml = '';
+        item.compromisos.forEach(c => {
+          compItemsHtml += `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04);">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <button class="btn-check-pago ${c.estado === 'PAGADO' ? 'checked' : ''}" style="width: 20px; height: 20px; font-size: 0.65rem;" onclick="togglePago('${c.id}')">✓</button>
+                <span style="font-size: 0.85rem; font-weight: 600; ${c.estado === 'PAGADO' ? 'text-decoration: line-through; opacity: 0.6;' : ''}">${c.nombre}</span>
+                <span style="font-size: 0.7rem; color: var(--text-muted);">(${c.banco})</span>
+              </div>
+              <span class="mono" style="font-weight: 700; font-size: 0.88rem;">${formatoMoneda(c.monto)}</span>
+            </div>
+          `;
+        });
+
+        card.innerHTML = `
+          <div class="timeline-header">
+            <span class="timeline-date-title">
+              📅 ${fechaTexto} (Día ${item.dia})
+            </span>
+            <span class="timeline-date-monto mono">${formatoMoneda(item.totalFecha)}</span>
+          </div>
+          <div>${compItemsHtml}</div>
+        `;
+
+        contCronograma.appendChild(card);
+      });
+    }
+
+    function renderizarListaGestionCuentas() {
+      const cont = document.getElementById('lista-gestion-cuentas');
+      if (!cont || !datosTablero.bancos) return;
+      cont.innerHTML = '';
+
+      datosTablero.bancos.forEach(b => {
+        const row = document.createElement('div');
+        row.style.cssText = 'display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05);';
+        row.innerHTML = `
+          <div>
+            <strong style="font-size: 0.88rem;">${b.nombreBanco}</strong>
+            <span style="font-size: 0.72rem; color: var(--text-muted); display: block;">${b.moneda} ${b.esReserva ? '• Reserva' : ''}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="mono" style="font-weight: 700; font-size: 0.9rem;">${formatoMoneda(b.saldoActual, b.moneda)}</span>
+            <button class="btn-secondary" style="padding: 4px 10px; font-size: 0.75rem;" onclick="abrirModalSaldo('${b.idCuenta}', '${b.nombreBanco}', ${b.saldoActual})">Editar</button>
+          </div>
+        `;
+        cont.appendChild(row);
+      });
+    }
+
+    // --- ACCIONES DIRECTAS SOBRE LA BASE Y NUBE ---
+    function togglePago(id) {
+      const comp = baseDatos.compromisosMensuales.find(c => c.id === id);
+      if (!comp) return;
+      comp.estado = comp.estado === 'PAGADO' ? 'PENDIENTE' : 'PAGADO';
+      comp.fecha_pago = comp.estado === 'PAGADO' ? new Date().toISOString().slice(0, 10) : null;
+      comp.actualizado_en = new Date().toISOString();
+
+      guardarBaseLocal(true);
+      recalcularTableroLocal();
+      sincronizarHaciaNube();
+    }
+
+    function eliminarCompromiso(id) {
+      if (!confirm('¿Deseas eliminar este compromiso del mes?')) return;
+      baseDatos.compromisosMensuales = baseDatos.compromisosMensuales.filter(c => c.id !== id);
+      guardarBaseLocal(true);
+      recalcularTableroLocal();
+      mostrarToast('Compromiso eliminado');
+      sincronizarHaciaNube();
+    }
+
+    // Modal Editar Compromiso (Monto y Vencimiento)
+    function abrirModalComp(id, nombre, monto, fecha) {
+      document.getElementById('modal-comp-id').value = id;
+      document.getElementById('modal-comp-titulo').textContent = nombre;
+      document.getElementById('modal-comp-monto').value = monto || '';
+      document.getElementById('modal-comp-fecha').value = fecha || '';
+      document.getElementById('modal-editar-comp').classList.add('open');
+      document.getElementById('modal-comp-monto').focus();
+    }
+
+    document.getElementById('btn-cerrar-modal-comp').addEventListener('click', cerrarModalComp);
+    document.getElementById('btn-cancelar-modal-comp').addEventListener('click', cerrarModalComp);
+
+    function cerrarModalComp() {
+      document.getElementById('modal-editar-comp').classList.remove('open');
+    }
+
+    document.getElementById('btn-guardar-modal-comp').addEventListener('click', () => {
+      const id = document.getElementById('modal-comp-id').value;
+      const monto = parseFloat(document.getElementById('modal-comp-monto').value) || 0;
+      const fecha = document.getElementById('modal-comp-fecha').value;
+
+      const comp = baseDatos.compromisosMensuales.find(c => c.id === id);
+      if (comp) {
+        comp.monto = monto;
+        if (fecha) {
+          comp.fecha_vencimiento = fecha;
+          comp.dia_vencimiento_estimado = parseInt(fecha.split('-')[2] || '1', 10);
+        }
+        comp.actualizado_en = new Date().toISOString();
+        guardarBaseLocal(true);
+        recalcularTableroLocal();
+        sincronizarHaciaNube();
+      }
+      cerrarModalComp();
+      mostrarToast('Monto y fecha actualizados');
+    });
+
+    // Modal Nuevo Compromiso
+    function abrirModalNuevoComp(idCuenta) {
+      document.getElementById('modal-nuevo-id-cuenta').value = idCuenta;
+      document.getElementById('modal-nuevo-nombre').value = '';
+      document.getElementById('modal-nuevo-monto').value = '0';
+      document.getElementById('modal-nuevo-fecha').value = `${mesCicloActivo}-15`;
+      document.getElementById('modal-nuevo-comp').classList.add('open');
+      document.getElementById('modal-nuevo-nombre').focus();
+    }
+
+    document.getElementById('btn-cerrar-modal-nuevo').addEventListener('click', cerrarModalNuevo);
+    document.getElementById('btn-cancelar-modal-nuevo').addEventListener('click', cerrarModalNuevo);
+
+    function cerrarModalNuevo() {
+      document.getElementById('modal-nuevo-comp').classList.remove('open');
+    }
+
+    document.getElementById('btn-guardar-modal-nuevo').addEventListener('click', () => {
+      const idCuenta = document.getElementById('modal-nuevo-id-cuenta').value;
+      const nombre = document.getElementById('modal-nuevo-nombre').value.trim();
+      const monto = parseFloat(document.getElementById('modal-nuevo-monto').value) || 0;
+      const fecha = document.getElementById('modal-nuevo-fecha').value || `${mesCicloActivo}-10`;
+      const categoria = document.getElementById('modal-nuevo-categoria').value;
+
+      if (!nombre) {
+        alert('Por favor ingresa un nombre para el compromiso');
+        return;
+      }
+
+      const id = `comp-${mesCicloActivo}-${Date.now().toString(36)}`;
+      const dia = parseInt(fecha.split('-')[2] || '1', 10);
+
+      baseDatos.compromisosMensuales.push({
+        id,
+        id_cuenta_debito: idCuenta,
+        mes_ciclo: mesCicloActivo,
+        nombre,
+        monto,
+        moneda: 'ARS',
+        categoria,
+        dia_vencimiento_estimado: dia,
+        fecha_vencimiento: fecha,
+        estado: 'PENDIENTE',
+        es_recurrente: true,
+        actualizado_en: new Date().toISOString()
+      });
+
+      guardarBaseLocal(true);
+      recalcularTableroLocal();
+      cerrarModalNuevo();
+      mostrarToast('Compromiso creado');
+      sincronizarHaciaNube();
+    });
+
+    // Modal Saldo de Cuenta
+    function abrirModalSaldo(idCuenta, nombreBanco, saldoActual) {
+      document.getElementById('modal-saldo-id-cuenta').value = idCuenta;
+      document.getElementById('modal-saldo-cuenta-nombre').textContent = `Saldo en ${nombreBanco}`;
+      document.getElementById('modal-saldo-valor').value = saldoActual || 0;
+      document.getElementById('modal-editar-saldo').classList.add('open');
+      document.getElementById('modal-saldo-valor').focus();
+    }
+
+    document.getElementById('btn-cerrar-modal-saldo').addEventListener('click', cerrarModalSaldo);
+    document.getElementById('btn-cancelar-modal-saldo').addEventListener('click', cerrarModalSaldo);
+
+    function cerrarModalSaldo() {
+      document.getElementById('modal-editar-saldo').classList.remove('open');
+    }
+
+    document.getElementById('btn-guardar-modal-saldo').addEventListener('click', () => {
+      const idCuenta = document.getElementById('modal-saldo-id-cuenta').value;
+      const saldo = parseFloat(document.getElementById('modal-saldo-valor').value) || 0;
+
+      const cta = baseDatos.cuentas.find(c => c.id === idCuenta);
+      if (cta) {
+        cta.saldo_actual = saldo;
+        guardarBaseLocal(true);
+        recalcularTableroLocal();
+        sincronizarHaciaNube();
+      }
+      cerrarModalSaldo();
+      mostrarToast('Saldo actualizado');
+    });
+
+    // Exportar e Importar Backup Manual JSON
+    document.getElementById('btn-exportar-archivo').addEventListener('click', () => {
+      const blob = new Blob([JSON.stringify(baseDatos, null, 2)], { type: 'application/json' });
+      const enlace = document.createElement('a');
+      enlace.href = URL.createObjectURL(blob);
+      enlace.download = `biblia_financiera_backup_${new Date().toISOString().slice(0, 10)}.json`;
+      enlace.click();
+      mostrarToast('Archivo de respaldo descargado');
+    });
+
+    document.getElementById('input-importar-archivo').addEventListener('change', (e) => {
+      const archivo = e.target.files[0];
+      if (!archivo) return;
+      const lector = new FileReader();
+      lector.onload = (ev) => {
+        try {
+          const paquete = JSON.parse(ev.target.result);
+          if (paquete && Array.isArray(paquete.cuentas) && Array.isArray(paquete.compromisosMensuales)) {
+            baseDatos = paquete;
+            guardarBaseLocal(true);
+            recalcularTableroLocal();
+            sincronizarHaciaNube();
+            mostrarToast('Respaldo restaurado y subido a la nube');
+          } else {
+            throw new Error();
+          }
+        } catch (err) {
+          alert('El archivo seleccionado no es un respaldo válido.');
+        }
+      };
+      lector.readAsText(archivo);
+    });
+
+    // --- MANEJO DE INSTALACIÓN PWA (Android, iOS y Escritorio) ---
+    let promptInstalacionPWA = null;
+    const btnInstalarHeader = document.getElementById('btn-instalar-app');
+    const btnInstalarCta = document.getElementById('btn-instalar-pwa-cta');
+    const instruccionesIos = document.getElementById('instrucciones-ios');
+
+    const esIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const esStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+    if (esIos && !esStandalone && instruccionesIos) {
+      instruccionesIos.style.display = 'block';
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      promptInstalacionPWA = e;
+      if (btnInstalarHeader) btnInstalarHeader.style.display = 'inline-flex';
+    });
+
+    async function ejecutarInstalacionApp() {
+      if (promptInstalacionPWA) {
+        promptInstalacionPWA.prompt();
+        const { outcome } = await promptInstalacionPWA.userChoice;
+        if (outcome === 'accepted') {
+          mostrarToast('¡BibliaFinanciera instalada!');
+          if (btnInstalarHeader) btnInstalarHeader.style.display = 'none';
+        }
+        promptInstalacionPWA = null;
+      } else if (esIos) {
+        alert('Para instalar en tu iPhone:\n1. Toca el botón Compartir\n2. Selecciona "Agregar a la pantalla de inicio"');
+      } else {
+        alert('Para instalar:\nEn el menú de tu navegador (3 puntos arriba a la derecha), presiona "Instalar aplicación" o "Agregar a la pantalla principal".');
+      }
+    }
+
+    if (btnInstalarHeader) btnInstalarHeader.addEventListener('click', ejecutarInstalacionApp);
+    if (btnInstalarCta) btnInstalarCta.addEventListener('click', ejecutarInstalacionApp);
+
+    // Registro de Service Worker con ruta relativa (./sw.js)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW info:', err));
+      });
+    }
+
+    // Sincronización automática al recuperar internet o al volver a abrir la app
+    window.addEventListener('online', () => sincronizarDesdeNube(true));
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        sincronizarDesdeNube(true);
+      }
+    });
+
+    // Inicialización inmediata
+    window.addEventListener('DOMContentLoaded', () => {
+      recalcularTableroLocal();
+      sincronizarDesdeNube(true);
+    });
+  </script>
+</body>
+</html>

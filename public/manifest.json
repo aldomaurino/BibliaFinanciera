@@ -2,7 +2,7 @@
   "name": "Biblia Financiera",
   "short_name": "BibliaFinanciera",
   "description": "Tablero Mensual de Fondeo por Banco y Vencimientos (Cloud 24/7)",
-  "start_url": "./",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "any",
